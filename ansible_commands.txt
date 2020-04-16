@@ -1,0 +1,107 @@
+Bash Completion:
+----------------
+sudo apt update
+sudo apt install bash-completion -y
+cat /etc/profile.d/bash_completion.sh
+echo "source /etc/profile.d/bash_completion.sh" >> ~/.bashrc
+exit
+sudo su
+
+Installation of Ansible:
+------------------------
+sudo apt update
+sudo apt install software-properties-common sshpass -y
+sudo apt-add-repository --yes --update ppa:ansible/ansible
+sudo apt install ansible openssh-server -y
+ansible --version
+
+
+
+
+Installing AWX:
+---------------
+Installing Docker and Docker Compose:
+-------------------------------------
+sudo apt-get update
+sudo apt -y install apt-transport-https ca-certificates curl gnupg-agent software-properties-common
+
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+
+sudo apt update
+sudo apt -y install docker-ce docker-compose
+sudo docker version
+
+sudo apt install -y nodejs npm
+sudo npm install npm --global
+
+sudo apt -y install python-pip git pwgen vim
+sudo pip install requests==2.14.2
+
+git clone --depth 50 https://github.com/ansible/awx.git
+cd awx/installer/
+vim inventory
+
+pwgen -N 1 -s 30
+
+dockerhub_base=ansible
+awx_task_hostname=awx
+awx_web_hostname=awxweb
+postgres_data_dir=/tmp/pgdocker
+host_port=80
+host_port_ssl=443
+docker_compose_dir=/tmp/awxcompose
+pg_username=awx
+pg_password=awxpass
+pg_database=awx
+pg_port=5432
+rabbitmq_password=awxpass
+rabbitmq_erlang_cookie=cookiemonster
+admin_user=admin
+admin_password=StrongAdminpassword
+create_preload_data=True
+secret_key=deLiXqo6ohK1HvLw1aGVipyg3eQLDD
+
+ansible-playbook -i inventory install.yml
+
+hostip_or_hostname:8000 or port 80
+
+Username: admin
+Password: set in the inventory file
+
+. Once you authenticate, you’ll get to AWX administration dashboard.
+
+
+Managing windows:
+-----------------
+On Ansible machine:
+-------------------
+sudo pip install pywinrm
+
+To add Kerberos auth to pywinrm, run the following:
+---------------------------------------------------
+sudo apt-get install gcc python-dev libkrb5-dev -y
+
+# for RHEL/CentOS/etc:
+sudo yum install gcc python-devel krb5-devel krb5-workstation
+
+pip install pywinrm[kerberos]
+
+To add CredSSP auth to pywinrm, run the following:
+--------------------------------------------------
+# for Debian/Ubuntu/etc:
+sudo apt-get install gcc python-dev libssl-dev
+
+# for RHEL/CentOS/etc:
+sudo yum install gcc python-devel openssl-devel
+
+pip install pywinrm[credssp]
+
+In the Windows machines:
+------------------------
+Run this
+
+New-Item -Path C:\Temp -ItemType Directory
+$config_script = "C:\Temp\ConfigureRemotingForAnsible.ps1"
+(New-Object -TypeName System.Net.WebClient).DownloadFile("https://raw.githubusercontent.com/ansible/ansible/devel/examples/scripts/ConfigureRemotingForAnsible.ps1", $config_script)
+powershell.exe -ExecutionPolicy ByPass -File $config_script -EnableCredSSP
